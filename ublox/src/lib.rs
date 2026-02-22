@@ -11,7 +11,7 @@ pub use crate::{
     error::{DateTimeError, MemWriterError, ParserError},
     parser::{
         AnyPacketRef, FixedBuffer, FixedLinearBuffer, NmeaPacketRef, Parser, ParserBuilder,
-        RtcmPacketRef, UbxParserIter, UnderlyingBuffer,
+        RtcmPacketRef, UbxParserIter, UbxRtcmNmeaParserIter, UnderlyingBuffer,
     },
     ubx_packets::*,
 };
