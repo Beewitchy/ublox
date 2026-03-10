@@ -15,8 +15,7 @@ impl<E: core::fmt::Display> fmt::Display for MemWriterError<E> {
     }
 }
 
-#[cfg(feature = "std")]
-impl<E> std::error::Error for MemWriterError<E> where E: std::error::Error {}
+impl<E> core::error::Error for MemWriterError<E> where E: core::error::Error {}
 
 /// Error that possible during packets parsing
 #[derive(Debug, PartialEq, Eq)]
@@ -67,8 +66,7 @@ impl fmt::Display for ParserError {
     }
 }
 
-#[cfg(feature = "std")]
-impl std::error::Error for ParserError {}
+impl core::error::Error for ParserError {}
 
 #[derive(Debug, Clone, Copy)]
 pub enum DateTimeError {
@@ -87,5 +85,4 @@ impl fmt::Display for DateTimeError {
     }
 }
 
-#[cfg(feature = "std")]
-impl std::error::Error for DateTimeError {}
+impl core::error::Error for DateTimeError {}
