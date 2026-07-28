@@ -60,6 +60,7 @@ use crate::ubx_packets::packets::{
     nav_dop::{NavDop, NavDopOwned, NavDopRef},
     nav_hp_pos_ecef::{NavHpPosEcef, NavHpPosEcefOwned, NavHpPosEcefRef},
     nav_hp_pos_llh::{NavHpPosLlh, NavHpPosLlhOwned, NavHpPosLlhRef},
+    nav_orb::{NavOrb, NavOrbOwned, NavOrbRef},
     nav_other::{
         NavEoe, NavEoeOwned, NavEoeRef, NavOdo, NavOdoOwned, NavOdoRef, NavVelECEF,
         NavVelECEFOwned, NavVelECEFRef,
@@ -137,6 +138,7 @@ define_recv_packets!(
         MonRxbuf,
         MonTxbuf,
         MgaAck,
+        NavOrb,
         MgaGpsIono,
         MgaGpsEph,
         MgaGpsUtc,

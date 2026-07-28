@@ -13,7 +13,10 @@
 
 use byteorder::{LittleEndian, WriteBytesExt};
 use proptest::prelude::*;
-use ublox::{constants::UBX_SYNC_CHAR_1, constants::UBX_SYNC_CHAR_2, ParserBuilder, UbxPacket};
+use ublox::{ParserBuilder, UbxPacket};
+
+mod common;
+use common::build_ubx_frame;
 
 /// Represents a single 40-byte port block within a MON-COMMS message.
 #[derive(Debug, Clone)]
@@ -83,19 +86,20 @@ impl MonCommsPayload {
     }
 }
 
-/// Calculates the 8-bit Fletcher-16 checksum used by u-blox.
-fn calculate_checksum(data: &[u8]) -> (u8, u8) {
-    let mut ck_a: u8 = 0;
-    let mut ck_b: u8 = 0;
-    for byte in data {
-        ck_a = ck_a.wrapping_add(*byte);
-        ck_b = ck_b.wrapping_add(ck_a);
-    }
-    (ck_a, ck_b)
-}
-
 fn port_id_strategy() -> impl Strategy<Value = u16> {
-    prop_oneof![Just(0u16), Just(1u16), Just(2u16), Just(3u16), Just(5u16)]
+    // portId values the receiver actually emits (high byte selects
+    // the interface; UART2's low byte differs between products: 0x0200 on
+    // ZED-X20P, 0x0201 on ZED-F9P), plus an arbitrary u16 to exercise the
+    // `PortId::Unknown` path.
+    prop_oneof![
+        Just(0x0000u16), // I2C
+        Just(0x0100u16), // UART1
+        Just(0x0200u16), // UART2 (ZED-X20P)
+        Just(0x0201u16), // UART2 (ZED-F9P)
+        Just(0x0300u16), // USB
+        Just(0x0400u16), // SPI
+        any::<u16>(),
+    ]
 }
 
 /// A proptest strategy for generating a single `MonCommsPortPayload`.
@@ -181,24 +185,7 @@ fn mon_comms_payload_strategy() -> impl Strategy<Value = MonCommsPayload> {
 pub fn ubx_mon_comms_frame_strategy() -> impl Strategy<Value = (MonCommsPayload, Vec<u8>)> {
     mon_comms_payload_strategy().prop_map(|payload_struct| {
         let payload = payload_struct.to_bytes();
-        let class_id = 0x0A;
-        let message_id = 0x36;
-        let length = payload.len() as u16;
-
-        let mut frame_core = Vec::with_capacity(4 + payload.len());
-        frame_core.push(class_id);
-        frame_core.push(message_id);
-        frame_core.write_u16::<LittleEndian>(length).unwrap();
-        frame_core.extend_from_slice(&payload);
-
-        let (ck_a, ck_b) = calculate_checksum(&frame_core);
-
-        let mut final_frame = Vec::with_capacity(8 + payload.len());
-        final_frame.push(UBX_SYNC_CHAR_1);
-        final_frame.push(UBX_SYNC_CHAR_2);
-        final_frame.extend_from_slice(&frame_core);
-        final_frame.push(ck_a);
-        final_frame.push(ck_b);
+        let final_frame = build_ubx_frame(0x0A, 0x36, &payload);
 
         (payload_struct, final_frame)
     })

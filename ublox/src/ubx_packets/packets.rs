@@ -62,6 +62,7 @@ pub mod mga_glo_eph;
 pub mod mga_gps_eph;
 pub mod mga_gps_iono;
 pub mod mga_gps_utc;
+pub mod mga_ini;
 
 pub mod mon_comms;
 pub mod mon_gnss;
@@ -84,6 +85,7 @@ pub mod nav_cov;
 pub mod nav_dop;
 pub mod nav_hp_pos_ecef;
 pub mod nav_hp_pos_llh;
+pub mod nav_orb;
 pub mod nav_other;
 pub mod nav_pl;
 pub mod nav_pos_ecef;
